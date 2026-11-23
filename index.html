@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ff7ba8">
+<title>Cuestionario para ceramistas 🌸</title>
+<style>
+  :root{
+    --pink:#ff6f9f; --pink-dark:#cf3e72; --pink-soft:#ffe6f0;
+    --line:#ffd0e1; --ink:#592c3d; --muted:#9a6c7e;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  [hidden]{display:none!important}
+  body{
+    margin:0;min-height:100dvh;color:var(--ink);
+    font-family:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,-apple-system,sans-serif;
+    background:
+      radial-gradient(circle at 12% 8%,#ffe0ed 0,transparent 34%),
+      radial-gradient(circle at 88% 22%,#ffeff5 0,transparent 32%),
+      radial-gradient(circle at 50% 96%,#ffe8f1 0,transparent 45%),#fffafc;
+    background-attachment:fixed;
+  }
+  button,input{font:inherit}
+  button{cursor:pointer}
+
+  /* Dibujos rosas de fondo */
+  .deco{position:fixed;pointer-events:none;opacity:.5;z-index:0;filter:drop-shadow(0 6px 10px rgba(255,111,159,.18))}
+  .deco--1{width:74px;top:6%;right:-22px;transform:rotate(18deg)}
+  .deco--2{width:54px;bottom:16%;left:-20px;transform:rotate(-25deg);opacity:.38}
+  .deco--3{width:38px;top:44%;right:-12px;transform:rotate(8deg);opacity:.3}
+  .sparkle{position:fixed;color:#ffb3ce;pointer-events:none;z-index:0}
+  .sparkle--1{top:15%;left:6%;font-size:20px}
+  .sparkle--2{bottom:8%;right:9%;font-size:14px}
+
+  .app{position:relative;z-index:1;width:100%;max-width:560px;margin:0 auto;
+    padding:calc(14px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
+    min-height:100dvh;display:flex;flex-direction:column}
+
+  .top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .icon-btn{width:40px;height:40px;flex:none;border-radius:14px;border:2px solid var(--line);
+    background:#fff;color:var(--pink-dark);font-size:20px;display:grid;place-items:center}
+  .progress-box{flex:1;min-width:0}
+  .progress-meta{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:5px}
+  .progress-track{height:9px;background:#fff;border-radius:99px;box-shadow:inset 0 1px 3px #f7cada;overflow:hidden}
+  .progress-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#ff9ec0,#ff5c92);transition:width .35s}
+
+  .card{background:#fff;border:2px solid #ffe1ec;border-radius:30px;padding:24px 20px;
+    box-shadow:0 16px 38px rgba(207,62,114,.11);flex:1;display:flex;flex-direction:column}
+  .card--welcome{text-align:center;align-items:center;justify-content:center}
+  .hero{width:min(240px,70vw);height:auto;margin:2px auto 6px}
+  .brand{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--pink);margin:6px 0 8px}
+  h1{font-size:clamp(25px,7vw,31px);line-height:1.15;margin:0 0 10px;color:var(--pink-dark)}
+  h2{font-size:clamp(21px,5.8vw,26px);line-height:1.2;margin:10px 0 8px;color:var(--pink-dark)}
+  p{line-height:1.5;margin:0}
+  .lead{font-size:16px;color:var(--muted);max-width:38ch}
+  .hint{font-size:14px;color:var(--muted);margin-top:6px;line-height:1.45}
+  .chip{display:inline-flex;align-self:flex-start;background:var(--pink-soft);color:var(--pink-dark);
+    border-radius:99px;padding:7px 13px;font-size:12px;font-weight:800;margin-bottom:4px}
+
+  .options{display:grid;gap:10px;margin-top:18px}
+  .options--yesno{grid-template-columns:1fr 1fr}
+  .option{display:flex;align-items:center;gap:11px;text-align:left;min-height:56px;padding:11px 14px;
+    border-radius:18px;border:2px solid var(--line);background:#fff;color:var(--ink);
+    font-size:16px;font-weight:650;transition:transform .12s,border-color .18s,background .18s,box-shadow .18s}
+  .option:active{transform:scale(.975)}
+  .option.selected{background:#fff1f7;border-color:var(--pink);box-shadow:0 0 0 3px #ffe3ee}
+  .option__emoji{font-size:21px;flex:none}
+  .option__label{flex:1}
+  .option__check{width:23px;height:23px;flex:none;border-radius:50%;border:2px solid #ffc9dd;
+    display:grid;place-items:center;color:#fff;font-size:13px;font-weight:800}
+  .option.selected .option__check{background:var(--pink);border-color:var(--pink)}
+  .option--yesno{flex-direction:column;justify-content:center;text-align:center;min-height:88px;gap:3px}
+  .option--yesno .option__emoji{font-size:29px}
+  .option--yesno .option__label{font-size:17px}
+  .option--yesno .option__check{display:none}
+
+  .field-wrap{display:flex;align-items:center;gap:8px;margin-top:18px;
+    border:2px solid var(--line);border-radius:18px;background:#fff;padding:0 14px}
+  .field-wrap:focus-within{border-color:var(--pink);box-shadow:0 0 0 3px #ffe3ee}
+  .field-wrap__affix{color:var(--pink);font-weight:800;font-size:18px;flex:none}
+  .field{width:100%;min-height:56px;border:0;background:transparent;outline:0;
+    font-size:18px;font-weight:600;color:var(--ink);padding:8px 0}
+  .field::placeholder{color:#c9a9b6;font-weight:500}
+  .skip{align-self:flex-start;margin-top:12px;background:none;border:0;padding:6px 2px;
+    color:var(--muted);font-size:14px;text-decoration:underline;text-underline-offset:3px}
+
+  .nav{display:flex;gap:10px;margin-top:auto;padding-top:22px}
+  .btn{min-height:54px;border-radius:17px;border:0;font-size:16px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s}
+  .btn:active{transform:scale(.975)}
+  .btn--ghost{flex:0 0 100px;background:#fff;border:2px solid var(--line);color:var(--pink-dark)}
+  .btn--primary{flex:1;background:linear-gradient(135deg,#ff92b7,#ff5c92);color:#fff;
+    box-shadow:0 9px 20px rgba(255,92,146,.28)}
+  .btn--whatsapp{width:100%;background:#25D366;color:#fff;min-height:58px;font-size:17px;
+    box-shadow:0 9px 20px rgba(37,211,102,.28)}
+  .btn--restart{width:100%;margin-top:10px;min-height:46px;background:#fff;border:2px solid var(--line);
+    color:var(--pink-dark);font-size:14px}
+
+  .summary{display:grid;gap:12px;margin:18px 0 16px}
+  .summary-group{border:1.5px solid var(--line);border-radius:20px;padding:14px 15px;background:#fff9fc}
+  .summary-group h3{margin:0 0 9px;font-size:14px;color:var(--pink);text-transform:uppercase;letter-spacing:.04em}
+  .summary-item{padding:7px 0;border-top:1px dashed #ffe0ec}
+  .summary-item:first-of-type{border-top:0}
+  .summary-q{font-size:12.5px;color:var(--muted);line-height:1.35}
+  .summary-a{font-size:15px;font-weight:700;margin-top:2px;overflow-wrap:anywhere}
+
+  @media (max-width:360px){.card{padding:20px 15px;border-radius:24px}.btn--ghost{flex-basis:84px;font-size:14px}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="rose" viewBox="0 0 64 64">
+    <path d="M32 5c7 0 12 5 13 12 8-3 15 3 15 11 0 6-4 11-10 13 2 10-6 18-18 18s-20-8-18-18c-6-2-10-7-10-13 0-8 7-14 15-11C20 10 25 5 32 5z" fill="#ffb3cd"/>
+    <circle cx="32" cy="31" r="17" fill="#ff8aaf"/>
+    <circle cx="32" cy="31" r="12" fill="#ff6698"/>
+    <circle cx="32" cy="31" r="8" fill="#e8467d"/>
+    <circle cx="32" cy="31" r="4" fill="#ffc9dc"/>
+  </symbol>
+</svg>
+<svg class="deco deco--1" aria-hidden="true"><use href="#rose"/></svg>
+<svg class="deco deco--2" aria-hidden="true"><use href="#rose"/></svg>
+<svg class="deco deco--3" aria-hidden="true"><use href="#rose"/></svg>
+<span class="sparkle sparkle--1" aria-hidden="true">✦</span>
+<span class="sparkle sparkle--2" aria-hidden="true">✧</span>
+
+<main class="app">
+  <div class="top" id="topBar" hidden>
+    <button class="icon-btn" id="backBtn" type="button" aria-label="Pregunta anterior">‹</button>
+    <div class="progress-box">
+      <div class="progress-meta"><span id="stepLabel">Pregunta 1</span><span id="sectionLabel"></span></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+    <span style="width:40px;flex:none" aria-hidden="true"></span>
+  </div>
+
+  <section class="card card--welcome" id="welcomeScreen">
+    <svg class="hero" viewBox="0 0 240 180" role="img" aria-label="Taza de cerámica sonriente con rosas">
+      <ellipse cx="120" cy="164" rx="82" ry="10" fill="#fbd9e7"/>
+      <path d="M84 44c-5-9 6-13 2-23M118 38c-5-9 6-13 2-23M152 44c-5-9 6-13 2-23" stroke="#ffbdd5" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <path d="M176 78c16-4 27 7 25 21-2 15-16 24-30 20" stroke="#ff9cbd" stroke-width="12" fill="none" stroke-linecap="round"/>
+      <path d="M58 70h122l-10 66c-1 9-9 16-18 16H86c-9 0-17-7-18-16L58 70z" fill="#ff8eb3"/>
+      <path d="M58 70h122l-2 13H60L58 70z" fill="#ffb0cb"/>
+      <ellipse cx="119" cy="70" rx="61" ry="12" fill="#ffe1ec"/>
+      <ellipse cx="119" cy="70" rx="52" ry="8" fill="#f9bdcf"/>
+      <circle cx="99" cy="104" r="5" fill="#6d3348"/><circle cx="139" cy="104" r="5" fill="#6d3348"/>
+      <circle cx="89" cy="117" r="7" fill="#ff6f9f" opacity=".45"/><circle cx="149" cy="117" r="7" fill="#ff6f9f" opacity=".45"/>
+      <path d="M108 118c4 7 18 7 22 0" stroke="#6d3348" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <use href="#rose" x="8" y="18" width="42" height="42"/>
+      <use href="#rose" x="192" y="8" width="34" height="34"/>
+      <path d="M28 132l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z" fill="#ff9ec0"/>
+    </svg>
+    <div class="brand">🌸 Tu taller, tus números</div>
+    <h1>Hablemos de tu cerámica</h1>
+    <p class="lead">Contanos cómo trabajás y armamos tu calculadora de precios a medida. Solo lleva ~3 minutos.</p>
+    <div class="nav" style="width:100%;margin-top:24px">
+      <button class="btn btn--primary" id="startBtn" type="button">Empezar 💕</button>
+    </div>
+    <p class="hint" style="margin-top:12px">Respondé desde el celular y enviános todo con un toque.</p>
+  </section>
+
+  <section class="card" id="quizScreen" hidden>
+    <span class="chip" id="chipSection"></span>
+    <h2 id="questionTitle"></h2>
+    <p class="hint" id="questionHint"></p>
+    <div class="options" id="optionsBox"></div>
+    <div id="inputBox" hidden>
+      <div class="field-wrap">
+        <span class="field-wrap__affix" id="inputAffix" hidden></span>
+        <input class="field" id="answerInput" autocomplete="off">
+      </div>
+      <button class="skip" id="skipBtn" type="button">No lo sé / saltar</button>
+    </div>
+    <div class="nav">
+      <button class="btn btn--ghost" id="prevBtn" type="button">Atrás</button>
+      <button class="btn btn--primary" id="nextBtn" type="button">Siguiente →</button>
+    </div>
+  </section>
+
+  <section class="card" id="summaryScreen" hidden>
+    <div style="text-align:center">
+      <svg width="76" height="76" aria-hidden="true"><use href="#rose"/></svg>
+      <span class="chip" style="margin:6px auto 0">¡Listo!</span>
+      <h2 style="margin-top:10px">Gracias por contarnos 🌷</h2>
+      <p class="lead" style="margin:0 auto">Revisá tus respuestas y mandátelas por WhatsApp con un toque.</p>
+    </div>
+    <div class="summary" id="summaryList"></div>
+    <button class="btn btn--whatsapp" id="whatsappBtn" type="button">💬 Enviar respuestas por WhatsApp</button>
+    <button class="btn btn--restart" id="restartBtn" type="button">↺ Empezar de nuevo</button>
+  </section>
+</main>
+
+<script>
+/* ============================================================
+   OPCIONAL: poné tu número con código de país para que las
+   respuestas lleguen siempre a vos. Ejemplo: 5491123456789
+   Si lo dejás vacío ("") se abre WhatsApp para elegir contacto.
+   ============================================================ */
+const WHATSAPP_NUMBER = "5493856232931";
+
+const QUESTIONS = [
+  {id:"piezas", section:"1 · Materia prima", type:"multi",
+   title:"¿Qué tipo de piezas hacés principalmente?", hint:"Tocá todas las que aplique.",
+   options:["☕ Tazas","🧉 Mates","🍽️ Platos","🌸 Decorativas","🧺 Utilitarias","✨ Esculturas u otras"]},
+  {id:"pasta", section:"1 · Materia prima", type:"single", title:"¿Cómo conseguís la arcilla?",
+   options:["Compro pasta ya preparada","Hago mi propia pasta","Trabajo con barbotina y moldes"]},
+  {id:"insumos", section:"1 · Materia prima", type:"yesno",
+   title:"¿Tenés una idea aproximada de lo que gastás en materiales por pieza?",
+   hint:"Arcilla, engobes, esmaltes, pigmentos y packaging."},
+  {id:"insumos_monto", section:"1 · Materia prima", type:"number", when:a=>a.insumos==="Sí",
+   title:"¿Cuánto gastás por pieza?", prefix:"$", placeholder:"Ej: 850", hint:"Si varía mucho, poné un promedio."},
+  {id:"merma", section:"1 · Materia prima", type:"yesno",
+   title:"¿Querés que el sistema sume un extra por roturas o mermas?",
+   hint:"Piezas que se rajan, se rompen en el horno o no pasan el control."},
+  {id:"merma_pct", section:"1 · Materia prima", type:"number", when:a=>a.merma==="Sí",
+   title:"¿Qué porcentaje de merma querés sumar?", suffix:"%", placeholder:"Ej: 10",
+   hint:"Si no lo sabés, 10% es un buen punto de partida."},
+
+  {id:"horno", section:"2 · Horno y cocciones", type:"yesno", title:"¿Tenés horno propio?"},
+  {id:"horno_consumo", section:"2 · Horno y cocciones", type:"single", when:a=>a.horno==="Sí",
+   title:"¿Qué consume tu horno?", options:["Electricidad","Gas","Ambos","No lo sé"]},
+  {id:"horno_costo", section:"2 · Horno y cocciones", type:"number", when:a=>a.horno==="Sí",
+   title:"¿Cuánto te cuesta una horneada?", prefix:"$", placeholder:"Ej: 3000",
+   hint:"Sumá bizcocho + esmalte si son dos cocciones."},
+  {id:"horno_piezas", section:"2 · Horno y cocciones", type:"number", when:a=>a.horno==="Sí",
+   title:"¿Cuántas piezas entran por tanda?", suffix:"piezas", placeholder:"Ej: 20", hint:"Un promedio está bien."},
+  {id:"horneo_alquilado", section:"2 · Horno y cocciones", type:"single", when:a=>a.horno==="No",
+   title:"¿Cómo te cobran la horneada?",
+   options:["Por pieza","Por bandeja o estante","Según el tamaño","Según la temperatura","No lo sé"]},
+
+  {id:"tiempo_modo", section:"3 · Tu tiempo", type:"single",
+   title:"¿Cómo preferís calcular tu tiempo de trabajo?",
+   options:["Por hora trabajada","Por etapas (amasado, acabado, esmaltado…)","Todavía no lo sé"]},
+  {id:"hora_valor", section:"3 · Tu tiempo", type:"number", when:a=>a.tiempo_modo==="Por hora trabajada",
+   title:"¿Cuánto vale tu hora de trabajo?", prefix:"$", placeholder:"Ej: 2000", hint:"Poné el valor que te resulte justo."},
+  {id:"tiempo_extra", section:"3 · Tu tiempo", type:"yesno",
+   title:"¿Querés sumar al cálculo el tiempo de secado y de horno?",
+   hint:"Aunque no estés trabajando activamente en la pieza."},
+
+  {id:"ventas", section:"4 · Ganancia y ventas", type:"multi", title:"¿Cómo vendés mayormente?",
+   hint:"Elegí todas las que uses.",
+   options:["Por encargo","Stock propio","Ferias y mercados","Redes sociales","Mayorista / revendedores"]},
+  {id:"fijos", section:"4 · Ganancia y ventas", type:"yesno",
+   title:"¿Tenés gastos fijos mensuales del taller?", hint:"Alquiler, internet, herramientas, packaging general…"},
+  {id:"fijos_monto", section:"4 · Ganancia y ventas", type:"number", when:a=>a.fijos==="Sí",
+   title:"¿Cuánto son aproximadamente por mes?", prefix:"$", placeholder:"Ej: 45000"},
+  {id:"ganancia", section:"4 · Ganancia y ventas", type:"single", title:"¿Cómo querés definir tu ganancia?",
+   options:["Un % sobre el costo total","Un margen sobre el precio final","Un monto fijo por pieza"]},
+  {id:"ganancia_valor", section:"4 · Ganancia y ventas", type:"number", when:a=>!!a.ganancia,
+   title:"¿Qué valor querés usar?", suffix:a=>a.ganancia.startsWith("Un %") ? "%" : "$",
+   placeholder:"Ej: 30", hint:"Si preferís decidirlo después, saltá esta pregunta."},
+  {id:"por_mayor", section:"4 · Ganancia y ventas", type:"yesno", title:"¿Querés tener también precios por mayor?"},
+  {id:"por_mayor_cant", section:"4 · Ganancia y ventas", type:"number", when:a=>a.por_mayor==="Sí",
+   title:"¿Desde cuántas unidades se aplica el precio por mayor?", suffix:"unidades", placeholder:"Ej: 6"},
+  {id:"extras", section:"4 · Ganancia y ventas", type:"single", title:"¿Querés sumar recargos por…?",
+   options:["Envío","Medio de pago","Envío y medio de pago","Ninguno, por ahora"]},
+
+  {id:"donde", section:"5 · Cómo usar el programa", type:"multi",
+   title:"¿Dónde te resulta más cómodo usarlo?", hint:"Tocá todas las que quieras.",
+   options:["💻 Computadora","📱 Celular","✨ Ambos","🌐 Navegador, sin instalar nada"]},
+  {id:"datos", section:"5 · Cómo usar el programa", type:"multi",
+   title:"¿Qué datos te gustaría ver al cargar una pieza?", hint:"Elegí todos los que te sirvan.",
+   options:["Costo de materiales","Costo de mano de obra","Precio sugerido","Ganancia neta por pieza"]},
+  {id:"catalogo", section:"5 · Cómo usar el programa", type:"yesno",
+   title:"¿Querés guardar un catálogo de piezas para actualizar precios rápido cuando suban los insumos o la luz/gas?"},
+  {id:"nombre", section:"5 · Cómo usar el programa", type:"text", title:"¿Cómo te llamás?",
+   placeholder:"Tu nombre (opcional)", hint:"Así sabemos de quién son las respuestas."},
+  {id:"contacto", section:"5 · Cómo usar el programa", type:"text", title:"¿Tu WhatsApp o email?",
+   placeholder:"Opcional", hint:"Solo si querés que te consultemos algo."}
+];
+
+let answers = {}, index = 0;
+const $ = id => document.getElementById(id);
+const el = {
+  top:$("topBar"), welcome:$("welcomeScreen"), quiz:$("quizScreen"), summary:$("summaryScreen"),
+  chip:$("chipSection"), title:$("questionTitle"), hint:$("questionHint"), options:$("optionsBox"),
+  inputBox:$("inputBox"), input:$("answerInput"), affix:$("inputAffix"),
+  back:$("backBtn"), next:$("nextBtn"), step:$("stepLabel"), section:$("sectionLabel"),
+  progress:$("progressFill"), list:$("summaryList")
+};
+const visible = () => QUESTIONS.filter(q => !q.when || q.when(answers));
+
+function show(name){
+  el.welcome.hidden = name !== "welcome";
+  el.quiz.hidden = name !== "quiz";
+  el.summary.hidden = name !== "summary";
+  el.top.hidden = name === "welcome";
+  if(name === "summary") buildSummary();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+function render(){
+  const vq = visible();
+  index = Math.max(0, Math.min(index, vq.length - 1));
+  const q = vq[index];
+
+  el.step.textContent = `Pregunta ${index+1} de ${vq.length}`;
+  el.section.textContent = q.section.split("·")[1].trim();
+  el.progress.style.width = `${((index+1)/vq.length)*100}%`;
+  el.chip.textContent = q.section;
+  el.title.textContent = q.title;
+  el.hint.textContent = q.hint || "";
+  el.hint.hidden = !q.hint;
+  el.next.textContent = index === vq.length - 1 ? "Ver resumen →" : "Siguiente →";
+
+  const isChoice = ["single","multi","yesno"].includes(q.type);
+  el.options.hidden = !isChoice;
+  el.inputBox.hidden = isChoice;
+  el.options.innerHTML = "";
+
+  if(isChoice){
+    el.options.classList.toggle("options--yesno", q.type === "yesno");
+    (q.type === "yesno" ? ["Sí","No"] : q.options).forEach(raw=>{
+      const value = typeof raw === "string" ? raw : raw.label;
+      const chosen = q.type === "multi"
+        ? Array.isArray(answers[q.id]) && answers[q.id].includes(value)
+        : answers[q.id] === value;
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "option" + (q.type === "yesno" ? " option--yesno" : "") + (chosen ? " selected" : "");
+      b.setAttribute("aria-pressed", String(chosen));
+      const em = document.createElement("span");
+      em.className = "option__emoji";
+      em.textContent = q.type === "yesno" ? (value === "Sí" ? "💗" : "🙅") : (typeof raw === "string" ? "" : raw.emoji || "");
+      const lb = document.createElement("span"); lb.className = "option__label"; lb.textContent = value;
+      const ck = document.createElement("span"); ck.className = "option__check"; ck.textContent = "✓";
+      b.append(em,lb,ck);
+      b.addEventListener("click", ()=>{
+        if(q.type === "multi"){
+          const arr = Array.isArray(answers[q.id]) ? answers[q.id].slice() : [];
+          const pos = arr.indexOf(value);
+          pos >= 0 ? arr.splice(pos,1) : arr.push(value);
+          answers[q.id] = arr;
+          b.classList.toggle("selected", arr.includes(value));
+          b.setAttribute("aria-pressed", String(arr.includes(value)));
+        }else{
+          answers[q.id] = value;
+          goNext();
+        }
+      });
+      el.options.appendChild(b);
+    });
+  }else{
+    const affix = typeof q.suffix === "function" ? q.suffix(answers) : (q.suffix || q.prefix || "");
+    el.affix.textContent = affix;
+    el.affix.hidden = !affix;
+    el.input.value = answers[q.id] && answers[q.id] !== "No lo sé" ? answers[q.id] : "";
+    el.input.placeholder = q.placeholder || "Escribí tu respuesta";
+    el.input.inputMode = q.type === "number" ? "decimal" : "text";
+    el.input.setAttribute("aria-label", q.title);
+    el.input.oninput = ()=>{ answers[q.id] = el.input.value; };
+  }
+  show("quiz");
+}
+function goNext(){
+  const vq = visible();
+  if(index >= vq.length - 1){ show("summary"); return; }
+  index++; render();
+}
+function goBack(){
+  if(index === 0){ show("welcome"); return; }
+  index--; render();
+}
+
+function answerText(q){
+  const v = answers[q.id];
+  if(v === undefined || v === "" || (Array.isArray(v) && !v.length)) return "Sin respuesta";
+  return Array.isArray(v) ? v.join(", ") : String(v);
+}
+function buildSummary(){
+  el.list.innerHTML = "";
+  let section = "", group;
+  visible().forEach(q=>{
+    if(q.section !== section){
+      section = q.section;
+      group = document.createElement("div"); group.className = "summary-group";
+      const h = document.createElement("h3"); h.textContent = section;
+      group.appendChild(h); el.list.appendChild(group);
+    }
+    const item = document.createElement("div"); item.className = "summary-item";
+    const a = document.createElement("div"); a.className = "summary-q"; a.textContent = q.title;
+    const b = document.createElement("div"); b.className = "summary-a"; b.textContent = answerText(q);
+    item.append(a,b); group.appendChild(item);
+  });
+}
+function sendWhatsapp(){
+  const lines = ["🌸 Respuestas del cuestionario de cerámica",""];
+  let section = "";
+  visible().forEach(q=>{
+    if(q.section !== section){ section = q.section; lines.push(`【${section}】`); }
+    lines.push(`• ${q.title}: ${answerText(q)}`);
+  });
+  const text = encodeURIComponent(lines.join("\n"));
+  const url = WHATSAPP_NUMBER.trim()
+    ? `https://wa.me/${WHATSAPP_NUMBER.trim()}?text=${text}`
+    : `https://api.whatsapp.com/send?text=${text}`;
+  window.location.href = url;
+}
+
+$("startBtn").addEventListener("click", ()=>{ answers = {}; index = 0; render(); });
+el.back.addEventListener("click", goBack);
+el.next.addEventListener("click", goNext);
+$("skipBtn").addEventListener("click", ()=>{ answers[visible()[index].id] = "No lo sé"; goNext(); });
+$("restartBtn").addEventListener("click", ()=>{ if(confirm("¿Borrar todo y empezar de nuevo?")) show("welcome"); });
+$("whatsappBtn").addEventListener("click", sendWhatsapp);
+document.addEventListener("keydown", e=>{
+  if(!el.quiz.hidden && e.key === "Enter" && document.activeElement === el.input){ e.preventDefault(); goNext(); }
+});
+show("welcome");
+</script>
+</body>
+</html>
